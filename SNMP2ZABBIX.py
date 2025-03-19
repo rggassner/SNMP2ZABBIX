@@ -97,7 +97,8 @@ for l in it:
     description = ""
     if groups is not None:
         if groups.group(1) is not None:
-            description = groups.group(1).encode('string_escape')
+            description = groups.group(1).encode('unicode_escape').decode('utf-8')
+            description = description.replace(' & ',' and ')
             description = description.replace('"', '')
             description = description.replace('\\n', '&#13;')
             description = description.replace('<', '&lt;')
@@ -212,7 +213,7 @@ XML = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 # SCALARS
-if SCALARS.count > 0:
+if len(SCALARS) > 0:
     XML += """            <items>
 """
 for s in SCALARS:
@@ -227,7 +228,7 @@ for s in SCALARS:
         XML += """                    <value_type>""" + s[2] + """</value_type>
 """
     XML += """                    <description>""" + s[3] + """</description>
-                    <delay>1h</delay>
+                    <delay>5m</delay>
                     <history>2w</history>
                     <trends>0</trends>               
                     <applications>
@@ -238,7 +239,7 @@ for s in SCALARS:
                     <status>DISABLED</status>
                 </item>
 """
-if SCALARS.count > 0:
+if len(SCALARS) > 0:
     XML += """            </items>
 """
 
@@ -254,16 +255,16 @@ XML += """            <macros>
 
 # DISCOVERY RULES
 if len(DISCOVERY_RULES):
-    SNMPOIDS = ""
     XML += """            <discovery_rules>
 """
     for x in DISCOVERY_RULES:
+        SNMPOIDS = ""
         XML += """                <discovery_rule>
                     <name>""" + x + """</name>
 """
         for y in DISCOVERY_RULES[x]:
             XML += """                    <description>""" + y[3] + """</description>
-                    <delay>3600</delay>
+                    <delay>300</delay>
                     <key>""" + y[1] + """</key>
                     <port>{$SNMP_PORT}</port>
                     <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
@@ -272,6 +273,7 @@ if len(DISCOVERY_RULES):
                     <item_prototypes>
 """
             for z in y[2]:
+                #description=z[3].replace(" & "," and ")
                 XML += """                        <item_prototype>
                             <name>""" + z[0] + """[{#SNMPINDEX}]</name>
                             <type>SNMPV2</type>
@@ -285,7 +287,7 @@ if len(DISCOVERY_RULES):
                             <snmp_community>{$SNMP_COMMUNITY}</snmp_community>
                             <key>""" + z[1] + """.[{#SNMPINDEX}]</key>
                             <snmp_oid>""" + z[1] + """.{#SNMPINDEX}</snmp_oid>
-                            <delay>1h</delay>
+                            <delay>5m</delay>
                             <history>2w</history>
                             <trends>0</trends>
 """
